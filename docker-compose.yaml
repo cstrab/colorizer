@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+
+  # Select Python or Go server:
+  server: 
+    build: ./server/python
+    env_file:
+      - .env
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    volumes:
+      - ./server/python:/app
+
+    # build: ./server/go
+    # env_file:
+    #   - .env
+    # ports:
+    #   - "${SERVER_PORT}:${SERVER_PORT}"
+    # volumes:
+    #   - ./server/go:/app
+
+  client:
+    build: 
+      context: ./client
+    env_file:
+    - .env
+    ports:
+      - "${VITE_CLIENT_PORT}:${VITE_NGINX_PORT}"
+    environment:
+      API_PROXY: "http://host.docker.internal:${SERVER_PORT}"
+    depends_on:
+      - server

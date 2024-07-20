@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.colorizer_client.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.colorizer_client.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.colorizer_client.name }}
+    spec:
+      containers:
+      - name: {{ .Values.colorizer_client.name }}
+        image: "{{ .Values.colorizer_client.imageBase }}:{{ .Values.colorizer_client.imageTag }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.colorizer_client.port }}
+        envFrom:
+        - configMapRef:
+            name: client-config

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.colorizer_server.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.colorizer_server.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.colorizer_server.name }}
+    spec:
+      containers:
+      - name: {{ .Values.colorizer_server.name }}
+        image: "{{ .Values.colorizer_server.imageBase }}:{{ .Values.colorizer_server.imageTag }}-{{ .Values.colorizer_server.language }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.colorizer_server.port }}
+        {{- if eq .Values.colorizer_server.language "python" }}
+        command: ["python", "main.py"]
+        {{- else if eq .Values.colorizer_server.language "go" }}
+        command: ["/root/main"]
+        {{- else }}
+        {{ fail (printf "Unsupported language: %s. Supported languages are 'python' and 'go'." .Values.colorizer_server.language) }}
+        {{- end }}
+        args:
+        - "--host"
+        - "0.0.0.0"
+        - "--port"
+        - "{{ .Values.colorizer_server.port }}"
+        - "--log-level"
+        - "{{ .Values.colorizer_server.logLevel }}"
+        - "--num-workers"
+        - "{{ .Values.colorizer_server.numWorkers }}"
+        env:
+        - name: PORT
+          value: "{{ .Values.colorizer_server.port }}"
+        - name: SERVER_HOST
+          value: "0.0.0.0"
+        - name: SERVER_LOG_LEVEL
+          value: "{{ .Values.colorizer_server.logLevel }}"
+        - name: SERVER_NUM_WORKERS
+          value: "{{ .Values.colorizer_server.numWorkers }}"
